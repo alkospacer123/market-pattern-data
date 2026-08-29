@@ -1,0 +1,85 @@
+name: Cycle 14 M1 Microstructure PnL
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle14-m1-micro.yml'
+  workflow_dispatch:
+
+jobs:
+  block:
+    strategy:
+      fail-fast: false
+      max-parallel: 11
+      matrix:
+        block_index: [0,1,2,3,4,5,6,7,8,9,10]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout research data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas scikit-learn
+      - name: Compile engines
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle11_nonlinear_pnl_block.py
+          python -m py_compile research/cycle14_m1_micro_block.py
+      - name: Run causal M1 microstructure block
+        run: |
+          python research/cycle14_m1_micro_block.py \
+            --data-root . \
+            --block-index ${{ matrix.block_index }} \
+            --output results/cycle14-block-${{ matrix.block_index }}
+      - name: Upload block
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle14-block-${{ matrix.block_index }}
+          path: results/cycle14-block-${{ matrix.block_index }}
+          retention-days: 30
+
+  finalize:
+    needs: block
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout audit code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas
+      - name: Download block artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cycle14-block-*
+          path: results/cycle14-blocks
+      - name: Finalize Cycle 14
+        run: |
+          python research/cycle14_finalize.py \
+            --block-root results/cycle14-blocks \
+            --output results/cycle14-final
+      - name: Save audit sources
+        if: always()
+        run: |
+          mkdir -p results/cycle14-final
+          cp research/CYCLE14_PROTOCOL.md results/cycle14-final/protocol.md || true
+          cp research/cycle14_m1_micro_block.py results/cycle14-final/block_engine.py || true
+          cp research/cycle14_finalize.py results/cycle14-final/finalizer.py || true
+          cp research/cycle11_nonlinear_pnl_block.py results/cycle14-final/execution_label_engine.py || true
+      - name: Upload final Cycle 14 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle14-final
+          path: results/cycle14-final
+          retention-days: 30
