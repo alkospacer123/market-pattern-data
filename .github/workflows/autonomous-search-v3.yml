@@ -1,0 +1,41 @@
+name: Autonomous Discovery v3
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+  workflow_dispatch:
+
+jobs:
+  search:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout market data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pandas
+      - name: Compile v3 engine
+        run: python -m py_compile research/autonomous_search_v3.py
+      - name: Run stable Jan-Feb discovery
+        run: |
+          python research/autonomous_search_v3.py \
+            --data-root . \
+            --output results/autonomous-search-v3
+      - name: Save effective source
+        if: always()
+        run: |
+          mkdir -p results/autonomous-search-v3
+          cp research/autonomous_search_v3.py results/autonomous-search-v3/source_engine.py || true
+      - name: Upload research artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonomous-search-v3
+          path: results/autonomous-search-v3
+          retention-days: 14
