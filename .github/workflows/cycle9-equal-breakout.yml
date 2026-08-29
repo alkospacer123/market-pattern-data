@@ -1,0 +1,47 @@
+name: Cycle 9 Equal-Level Breakout
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle9-equal-breakout.yml'
+  workflow_dispatch:
+
+jobs:
+  breakout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout discovery data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pandas
+      - name: Compile engines
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle9_equal_level_breakout.py
+      - name: Run Cycle 9
+        run: |
+          python research/cycle9_equal_level_breakout.py \
+            --data-root . \
+            --output results/cycle9-equal-breakout
+      - name: Save audit source
+        if: always()
+        run: |
+          mkdir -p results/cycle9-equal-breakout
+          cp research/CYCLE9_PROTOCOL.md results/cycle9-equal-breakout/protocol.md || true
+          cp research/cycle9_equal_level_breakout.py results/cycle9-equal-breakout/cycle9_source.py || true
+          cp research/autonomous_search_v3.py results/cycle9-equal-breakout/data_metrics_engine.py || true
+      - name: Upload Cycle 9 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle9-equal-breakout
+          path: results/cycle9-equal-breakout
+          retention-days: 30
