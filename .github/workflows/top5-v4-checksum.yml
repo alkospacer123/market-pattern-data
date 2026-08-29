@@ -18,3 +18,14 @@ jobs:
             2026/CNY/CNY_2026_Q2_M1.csv \
             2026/Si/Si_2026_Q1_M1.csv \
             2026/Si/Si_2026_Q2_M1.csv
+      - name: Package frozen M1 raw files
+        uses: actions/upload-artifact@v4
+        with:
+          name: top5-v4-frozen-m1-data
+          path: |
+            2026/CNY/CNY_2026_Q1_M1.csv
+            2026/CNY/CNY_2026_Q2_M1.csv
+            2026/Si/Si_2026_Q1_M1.csv
+            2026/Si/Si_2026_Q2_M1.csv
+          if-no-files-found: error
+          compression-level: 0
