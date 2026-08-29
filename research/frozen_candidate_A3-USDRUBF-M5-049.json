@@ -1,0 +1,176 @@
+{
+  "candidate_id": "A3-USDRUBF-M5-049",
+  "status": "FROZEN_FOR_INTERNAL_CONFIRMATION",
+  "selection_source": {
+    "workflow_run_id": 33271538151,
+    "artifact_id": 9720257713,
+    "engine_commit": "6ed54fd8a137fa2074abc33a1677b97db004f7b5",
+    "selection_data_end_exclusive": "2026-05-16T00:00:00+03:00",
+    "internal_confirmation_accessed_at_freeze": false,
+    "true_oos_2025_accessed_at_freeze": false
+  },
+  "instrument": "USDRUBF",
+  "timeframe": "M5",
+  "side": "SHORT",
+  "rule": [
+    {
+      "feature": "dist_high_120m_atr",
+      "state": "HIGH25"
+    },
+    {
+      "feature": "dist_low_15m_atr",
+      "state": "HIGH10"
+    }
+  ],
+  "execution": {
+    "signal_available_after_m5_close": true,
+    "entry": "exact next M1 open",
+    "stop_atr14": 1.25,
+    "target_r": 1.5,
+    "max_hold_minutes": 120,
+    "same_moscow_day_only": true,
+    "intrabar_tie_policy": "STOP_FIRST",
+    "base_friction_adverse_ticks_per_side": 1,
+    "stress_friction_adverse_ticks_per_side": 2,
+    "commission": "excluded"
+  },
+  "discovery_survivor_gates": {
+    "base_pf_min": 2.0,
+    "stress_pf_min": 1.5,
+    "expectancy_positive": true,
+    "minimum_trades": 30,
+    "minimum_unique_days": 15,
+    "minimum_positive_months": 3,
+    "minimum_positive_folds": 3,
+    "largest_winner_share_max": 0.25,
+    "minimum_plateau_neighbors": 2
+  },
+  "discovery_result": {
+    "train_base": {
+      "trades": 23,
+      "pf": 2.5599602177102856,
+      "expectancy_bps": 5.880332575495682,
+      "total_bps": 135.2476492364007,
+      "win_rate": 0.6956521739130435,
+      "positive_months": 2,
+      "largest_winner_share": 0.10459305942636131,
+      "unique_days": 15
+    },
+    "train_stress": {
+      "trades": 23,
+      "pf": 1.7268166648486865,
+      "expectancy_bps": 3.3065463220198015,
+      "total_bps": 76.05056540645543,
+      "win_rate": 0.6956521739130435,
+      "positive_months": 2,
+      "largest_winner_share": 0.11415104034811088,
+      "unique_days": 15
+    },
+    "validation": {
+      "base": {
+        "trades": 32,
+        "pf": 2.622743830772824,
+        "expectancy_bps": 6.451295310167864,
+        "total_bps": 206.44144992537164,
+        "win_rate": 0.65625,
+        "positive_months": 3,
+        "largest_winner_share": 0.12014584888287183,
+        "unique_days": 25,
+        "positive_folds": 3
+      },
+      "stress": {
+        "trades": 32,
+        "pf": 1.7971959420290036,
+        "expectancy_bps": 3.8760279244999443,
+        "total_bps": 124.03289358399822,
+        "win_rate": 0.625,
+        "positive_months": 3,
+        "largest_winner_share": 0.1338260825046697,
+        "unique_days": 25,
+        "positive_folds": 3
+      },
+      "fold_base": [
+        {
+          "trades": 9,
+          "pf": 3.412743078454593,
+          "expectancy_bps": 8.453225691356806,
+          "total_bps": 76.07903122221126,
+          "win_rate": 0.6666666666666666,
+          "positive_months": 1,
+          "largest_winner_share": 0.22777068426392028,
+          "unique_days": 7,
+          "fold_id": "WF-03"
+        },
+        {
+          "trades": 16,
+          "pf": 1.704096704279658,
+          "expectancy_bps": 3.2352355001226423,
+          "total_bps": 51.763768001962276,
+          "win_rate": 0.6875,
+          "positive_months": 1,
+          "largest_winner_share": 0.1338721833834889,
+          "unique_days": 12,
+          "fold_id": "WF-04"
+        },
+        {
+          "trades": 7,
+          "pf": 4.545691426226105,
+          "expectancy_bps": 11.228378671599728,
+          "total_bps": 78.5986507011981,
+          "win_rate": 0.5714285714285714,
+          "positive_months": 1,
+          "largest_winner_share": 0.3978299485453379,
+          "unique_days": 6,
+          "fold_id": "WF-05"
+        }
+      ],
+      "fold_stress": [
+        {
+          "trades": 9,
+          "pf": 2.391953844981786,
+          "expectancy_bps": 6.006972682947926,
+          "total_bps": 54.06275414653133,
+          "win_rate": 0.6666666666666666,
+          "positive_months": 1,
+          "largest_winner_share": 0.23819225266235947,
+          "unique_days": 7,
+          "fold_id": "WF-03"
+        },
+        {
+          "trades": 16,
+          "pf": 1.1179002126458284,
+          "expectancy_bps": 0.6375750744627999,
+          "total_bps": 10.201201191404799,
+          "win_rate": 0.625,
+          "positive_months": 1,
+          "largest_winner_share": 0.14627462398413502,
+          "unique_days": 12,
+          "fold_id": "WF-04"
+        },
+        {
+          "trades": 7,
+          "pf": 2.97760051658962,
+          "expectancy_bps": 8.538419749437441,
+          "total_bps": 59.76893824606209,
+          "win_rate": 0.5714285714285714,
+          "positive_months": 1,
+          "largest_winner_share": 0.41581924478039006,
+          "unique_days": 6,
+          "fold_id": "WF-05"
+        }
+      ]
+    },
+    "stable_neighbor_count": 4
+  },
+  "internal_confirmation": {
+    "moscow_start_inclusive": "2026-05-16T00:00:00+03:00",
+    "moscow_end_exclusive": "2026-07-02T00:00:00+03:00",
+    "candidate_or_parameters_may_not_change": true,
+    "quantile_cutpoints_fit_only_on_pre_confirmation_discovery": true
+  },
+  "true_oos_2025": {
+    "status": "SEALED",
+    "may_open_only_after_successful_internal_confirmation": true
+  },
+  "freeze_sha256": "1441d289085552d2c5b8635bf2f93ea4b5dbb746de7c6edc6995396e34d10da0"
+}
