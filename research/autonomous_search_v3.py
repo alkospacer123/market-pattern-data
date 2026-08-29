@@ -263,50 +263,140 @@ def beam_rules(f: pd.DataFrame, states: dict[str,np.ndarray], features: list[str
         if key not in best or row["effect"]["score"]>best[key]["effect"]["score"]:best[key]=row
     return sorted(best.values(),key=lambda x:x["effect"]["score"],reverse=True)[:180]
 
-_EXEC_INDEX_CACHE={}
-def execution_index(exec_f: pd.DataFrame) -> dict[pd.Timestamp,int]:
-    key=id(exec_f)
-    if key not in _EXEC_INDEX_CACHE:
-        _EXEC_INDEX_CACHE[key]={t:i for i,t in enumerate(exec_f.time.tolist())}
-    return _EXEC_INDEX_CACHE[key]
+_FRAME_ARRAY_CACHE={}
+_LAST_RAW_SIM={"key":None,"trades":None}
+
+def _frame_arrays(f: pd.DataFrame) -> dict[str,Any]:
+    key=id(f)
+    cached=_FRAME_ARRAY_CACHE.get(key)
+    if cached is not None:
+        return cached
+    times=f["time"].to_numpy(dtype="datetime64[ns]").astype(np.int64)
+    day=(times//86_400_000_000_000).astype(np.int64)
+    n=len(f)
+    day_end=np.empty(n,dtype=np.int64)
+    e=n-1
+    while e>=0:
+        s=e
+        d=day[e]
+        while s-1>=0 and day[s-1]==d:
+            s-=1
+        day_end[s:e+1]=e
+        e=s-1
+    cached={
+        "time":times,
+        "day":day,
+        "day_end":day_end,
+        "open":f["open"].to_numpy(float),
+        "high":f["high"].to_numpy(float),
+        "low":f["low"].to_numpy(float),
+        "close":f["close"].to_numpy(float),
+        "date_str":np.asarray([str(x) for x in f["date"].to_numpy()],dtype=object),
+        "instrument":str(f["instrument"].iloc[0]) if len(f) else "",
+        "lookup":{int(t):i for i,t in enumerate(times)},
+    }
+    _FRAME_ARRAY_CACHE[key]=cached
+    return cached
+
+def _simulate_raw(signal_f: pd.DataFrame, exec_f: pd.DataFrame, signal_mask: np.ndarray, side: int,
+                  params: tuple[float,float,int], tf: str) -> list[dict[str,Any]]:
+    stop_atr,target_r,hold_minutes=params
+    sig_mask=onset(signal_f,signal_mask)
+    signal_ix=np.flatnonzero(sig_mask)
+    sarr=_frame_arrays(signal_f)
+    earr=_frame_arrays(exec_f)
+    atrs=signal_f["atr14"].to_numpy(float)
+    tf_ns=TF_MINUTES[tf]*60_000_000_000
+    hold_ns=int(hold_minutes)*60_000_000_000
+    out=[]
+    available_exec=-1
+    for i in signal_ix:
+        available_ns=int(sarr["time"][i])+tf_ns
+        ei=earr["lookup"].get(available_ns)
+        if ei is None or ei<=available_exec or earr["day"][ei]!=sarr["day"][i]:
+            continue
+        atr=float(atrs[i])
+        if not np.isfinite(atr) or atr<=0:
+            continue
+        entry=float(earr["open"][ei])
+        risk=float(stop_atr)*atr
+        stop=entry-side*risk
+        target=entry+side*risk*float(target_r)
+        limit_ns=available_ns+hold_ns
+        xi=int(np.searchsorted(earr["time"],limit_ns,side="left")-1)
+        if xi<ei:
+            xi=ei
+        day_end=int(earr["day_end"][ei])
+        if xi>day_end:
+            xi=day_end
+        raw=float(earr["close"][xi])
+        reason="TIME"
+        for j in range(ei,xi+1):
+            o=float(earr["open"][j]);h=float(earr["high"][j]);l=float(earr["low"][j])
+            if side==1:
+                if o<=stop:
+                    xi=j;raw=o;reason="STOP_GAP";break
+                if o>=target:
+                    xi=j;raw=target;reason="TARGET_GAP_CONSERVATIVE";break
+                hit_s=l<=stop;hit_t=h>=target
+            else:
+                if o>=stop:
+                    xi=j;raw=o;reason="STOP_GAP";break
+                if o<=target:
+                    xi=j;raw=target;reason="TARGET_GAP_CONSERVATIVE";break
+                hit_s=h>=stop;hit_t=l<=target
+            if hit_s:
+                xi=j;raw=stop;reason="STOP_FIRST_TIE" if hit_t else "STOP";break
+            if hit_t:
+                xi=j;raw=target;reason="TARGET";break
+        available_exec=xi
+        out.append({
+            "_entry":entry,"_raw_exit":float(raw),
+            "date":str(earr["date_str"][ei]),
+            "instrument":earr["instrument"],
+            "timeframe":tf,
+            "signal_time":str(pd.Timestamp(int(sarr["time"][i]))),
+            "entry_time":str(pd.Timestamp(int(earr["time"][ei]))),
+            "exit_time":str(pd.Timestamp(int(earr["time"][xi]))),
+            "reason":reason,
+        })
+    return out
 
 def simulate(signal_f: pd.DataFrame, exec_f: pd.DataFrame, signal_mask: np.ndarray, side: int,
              params: tuple[float,float,int], tick: float, friction_ticks: int, tf: str) -> list[dict[str,Any]]:
-    stop_atr,target_r,hold_minutes=params;signal_ix=np.flatnonzero(onset(signal_f,signal_mask));lookup=execution_index(exec_f);out=[];available_exec=-1
-    exec_dates=exec_f.date.to_numpy()
-    for i in signal_ix:
-        available_time=signal_f.time.iloc[i]+pd.Timedelta(minutes=TF_MINUTES[tf]);ei=lookup.get(available_time)
-        if ei is None or ei<=available_exec or exec_f.date.iloc[ei]!=signal_f.date.iloc[i]:continue
-        atr=float(signal_f.atr14.iloc[i])
-        if not np.isfinite(atr) or atr<=0:continue
-        entry=float(exec_f.open.iloc[ei]);risk=stop_atr*atr;stop=entry-side*risk;target=entry+side*risk*target_r
-        limit_time=available_time+pd.Timedelta(minutes=hold_minutes);xi=ei
-        while xi+1<len(exec_f) and exec_dates[xi+1]==exec_dates[ei] and exec_f.time.iloc[xi+1]<limit_time:xi+=1
-        raw=float(exec_f.close.iloc[xi]);reason="TIME"
-        for j in range(ei,xi+1):
-            o=float(exec_f.open.iloc[j]);h=float(exec_f.high.iloc[j]);l=float(exec_f.low.iloc[j])
-            if side==1:
-                if o<=stop:xi=j;raw=o;reason="STOP_GAP";break
-                if o>=target:xi=j;raw=target;reason="TARGET_GAP_CONSERVATIVE";break
-                hit_s=l<=stop;hit_t=h>=target
-            else:
-                if o>=stop:xi=j;raw=o;reason="STOP_GAP";break
-                if o<=target:xi=j;raw=target;reason="TARGET_GAP_CONSERVATIVE";break
-                hit_s=h>=stop;hit_t=l<=target
-            if hit_s:xi=j;raw=stop;reason="STOP_FIRST_TIE" if hit_t else "STOP";break
-            if hit_t:xi=j;raw=target;reason="TARGET";break
-        available_exec=xi;adj_entry=entry+side*friction_ticks*tick;adj_exit=raw-side*friction_ticks*tick;pnl=side*(adj_exit-adj_entry);bps=10000*pnl/entry
-        out.append({"bps":float(bps),"date":str(exec_f.date.iloc[ei]),"instrument":str(exec_f.instrument.iloc[ei]),"timeframe":tf,
-                    "signal_time":str(signal_f.time.iloc[i]),"entry_time":str(exec_f.time.iloc[ei]),"exit_time":str(exec_f.time.iloc[xi]),"reason":reason})
+    key=(id(signal_f),id(exec_f),id(signal_mask),int(side),tuple(params),tf)
+    if _LAST_RAW_SIM["key"]==key:
+        raw_trades=_LAST_RAW_SIM["trades"]
+    else:
+        raw_trades=_simulate_raw(signal_f,exec_f,signal_mask,side,params,tf)
+        _LAST_RAW_SIM["key"]=key
+        _LAST_RAW_SIM["trades"]=raw_trades
+    cost=float(friction_ticks)*float(tick)
+    out=[]
+    for x in raw_trades:
+        entry=float(x["_entry"]); raw_exit=float(x["_raw_exit"])
+        adj_entry=entry+side*cost
+        adj_exit=raw_exit-side*cost
+        pnl=side*(adj_exit-adj_entry)
+        y={k:v for k,v in x.items() if not k.startswith("_")}
+        y["bps"]=float(10000*pnl/entry)
+        out.append(y)
     return out
 
 def metrics(trades: list[dict[str,Any]]) -> dict[str,Any]:
-    if not trades:return {"trades":0,"pf":0.0,"expectancy_bps":None,"total_bps":0.0,"win_rate":0.0,"positive_months":0,"largest_winner_share":None,"unique_days":0}
-    b=np.asarray([x["bps"] for x in trades],float);gp=b[b>0].sum();gl=-b[b<0].sum();pf=gp/gl if gl else (np.inf if gp else 0.0)
-    months=np.asarray([str(pd.Period(x["date"],freq="M")) for x in trades]);positive_months=sum(b[months==mo].sum()>0 for mo in np.unique(months));wins=b[b>0]
-    share=wins.max()/wins.sum() if len(wins) else np.nan
-    return {"trades":len(b),"pf":float(pf),"expectancy_bps":float(b.mean()),"total_bps":float(b.sum()),"win_rate":float((b>0).mean()),
-            "positive_months":int(positive_months),"largest_winner_share":float(share) if np.isfinite(share) else None,"unique_days":len(set(x["date"] for x in trades))}
+    if not trades:
+        return {"trades":0,"pf":0.0,"expectancy_bps":None,"total_bps":0.0,"win_rate":0.0,"positive_months":0,"largest_winner_share":None,"unique_days":0}
+    b=np.fromiter((float(x["bps"]) for x in trades),dtype=float,count=len(trades))
+    gp=float(b[b>0].sum());gl=float(-b[b<0].sum())
+    pf=gp/gl if gl else (np.inf if gp else 0.0)
+    months=np.asarray([x["date"][:7] for x in trades],dtype=object)
+    positive_months=sum(float(b[months==mo].sum())>0 for mo in np.unique(months))
+    wins=b[b>0]
+    share=float(wins.max()/wins.sum()) if len(wins) else np.nan
+    return {"trades":len(b),"pf":float(pf),"expectancy_bps":float(b.mean()),"total_bps":float(b.sum()),
+            "win_rate":float((b>0).mean()),"positive_months":int(positive_months),
+            "largest_winner_share":float(share) if np.isfinite(share) else None,
+            "unique_days":len({x["date"] for x in trades})}
 
 def objective(base: dict[str,Any], stress: dict[str,Any], effect_score: float) -> float:
     if base["trades"]<8 or stress["trades"]<8 or base["expectancy_bps"] is None or stress["expectancy_bps"] is None:return -1e9
@@ -464,7 +554,7 @@ def run(data_root: Path, output: Path) -> dict[str,Any]:
         row={**c,"validation":ev,"plateau":plateau,"stable_neighbor_count":stable_neighbors,"gate_pass":bool(passed),"gate_failures":fail,"replication":rep};row["rank_score"]=float(candidate_rank(row));evaluated.append(row)
         if i%20==0:print("EVALUATED",i,"/",len(frozen),flush=True)
     evaluated.sort(key=lambda x:(x["gate_pass"],x["rank_score"]),reverse=True);survivors=[x for x in evaluated if x["gate_pass"]];near=[x for x in evaluated if not x["gate_pass"] and x["validation"]["base"]["pf"]>=1.5 and (x["validation"]["base"]["expectancy_bps"] or -1e9)>0][:20]
-    manifest={"status":"SURVIVOR_FOUND" if survivors else "NO_SURVIVOR_YET","engine_version":"autonomous-search-v3","methodology":"JAN_FEB_STABILITY_DISCOVERY_THEN_FROZEN_MAR_MAY_WALK_FORWARD","discovery_start":str(DISCOVERY_START),"discovery_train_end_exclusive":str(DISCOVERY_TRAIN_END),"discovery_end_exclusive":str(DISCOVERY_END),"internal_confirmation_accessed":False,"true_oos_2025_accessed":False,"full_file_hashes_computed":False,"source_modified":False,"contexts":["CNYRUBF/M1","CNYRUBF/M5","USDRUBF/M1","USDRUBF/M5"],"frozen_candidates":len(frozen),"survivor_count":len(survivors),"gates":GATES,"elapsed_seconds":perf_counter()-t0,"provenance":provenance}
+    manifest={"status":"SURVIVOR_FOUND" if survivors else "NO_SURVIVOR_YET","engine_version":"autonomous-search-v3-fast","methodology":"JAN_FEB_STABILITY_DISCOVERY_THEN_FROZEN_MAR_MAY_WALK_FORWARD","discovery_start":str(DISCOVERY_START),"discovery_train_end_exclusive":str(DISCOVERY_TRAIN_END),"discovery_end_exclusive":str(DISCOVERY_END),"internal_confirmation_accessed":False,"true_oos_2025_accessed":False,"full_file_hashes_computed":False,"source_modified":False,"contexts":["CNYRUBF/M1","CNYRUBF/M5","USDRUBF/M1","USDRUBF/M5"],"frozen_candidates":len(frozen),"survivor_count":len(survivors),"gates":GATES,"elapsed_seconds":perf_counter()-t0,"provenance":provenance}
     (output/"run_manifest.json").write_text(json.dumps(manifest,indent=2,default=jsonable)+"\n");(output/"frozen_january_candidates.json").write_text(json.dumps(frozen,indent=2,default=jsonable)+"\n");(output/"evaluated_candidates.json").write_text(json.dumps(evaluated,indent=2,default=jsonable)+"\n");(output/"survivors.json").write_text(json.dumps(survivors,indent=2,default=jsonable)+"\n");(output/"near_candidates.json").write_text(json.dumps(near,indent=2,default=jsonable)+"\n")
     report=["# Autonomous Search v3","",f"Status: **{manifest['status']}**",f"Frozen Jan-Feb candidates: {len(frozen)}",f"Strict survivors: {len(survivors)}","","## Method","Candidate semantics and execution parameters are selected only from Jan-Feb, with positive BASE and STRESS expectancy required separately in both discovery months. The rule is frozen before March and evaluated on March, April, and 1-15 May. Numeric states use broad/strict tail aliases (25% and 10%); clock time uses fixed non-refitted buckets. Quantile cutpoints are refit only from data preceding each validation block. M5 signals execute on exact M1 opens.","","## Gates",json.dumps(GATES,sort_keys=True),"","## Top candidates"]
     for x in evaluated[:15]:
