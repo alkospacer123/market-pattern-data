@@ -1,0 +1,47 @@
+name: Cycle 6 Pooled Causal Ridge
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle6-pooled-ridge.yml'
+  workflow_dispatch:
+
+jobs:
+  ridge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout discovery data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pandas
+      - name: Compile engine
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle6_pooled_ridge.py
+      - name: Run pooled causal Ridge
+        run: |
+          python research/cycle6_pooled_ridge.py \
+            --data-root . \
+            --output results/cycle6-ridge
+      - name: Save audit source
+        if: always()
+        run: |
+          mkdir -p results/cycle6-ridge
+          cp research/CYCLE6_PROTOCOL.md results/cycle6-ridge/protocol.md || true
+          cp research/cycle6_pooled_ridge.py results/cycle6-ridge/model_source.py || true
+          cp research/autonomous_search_v3.py results/cycle6-ridge/execution_engine.py || true
+      - name: Upload Cycle 6 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle6-ridge
+          path: results/cycle6-ridge
+          retention-days: 30
