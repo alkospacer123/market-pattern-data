@@ -1,0 +1,84 @@
+name: Cycle 11 Nonlinear PnL Discovery
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle11-nonlinear-pnl.yml'
+  workflow_dispatch:
+
+jobs:
+  block:
+    strategy:
+      fail-fast: false
+      max-parallel: 11
+      matrix:
+        block_index: [0,1,2,3,4,5,6,7,8,9,10]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout research data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas scikit-learn
+      - name: Compile block engine
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle11_nonlinear_pnl_block.py
+      - name: Run causal weekly block
+        run: |
+          python research/cycle11_nonlinear_pnl_block.py \
+            --data-root . \
+            --block-index ${{ matrix.block_index }} \
+            --output results/cycle11-block-${{ matrix.block_index }}
+      - name: Upload block
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle11-block-${{ matrix.block_index }}
+          path: results/cycle11-block-${{ matrix.block_index }}
+          retention-days: 30
+
+  finalize:
+    needs: block
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout audit code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas
+      - name: Download block artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cycle11-block-*
+          path: results/cycle11-blocks
+      - name: Finalize Cycle 11
+        run: |
+          python research/cycle11_finalize.py \
+            --block-root results/cycle11-blocks \
+            --output results/cycle11-final
+      - name: Save audit sources
+        if: always()
+        run: |
+          mkdir -p results/cycle11-final
+          cp research/CYCLE11_PROTOCOL.md results/cycle11-final/protocol.md || true
+          cp research/cycle11_nonlinear_pnl_block.py results/cycle11-final/block_engine.py || true
+          cp research/cycle11_finalize.py results/cycle11-final/finalizer.py || true
+          cp research/autonomous_search_v3.py results/cycle11-final/feature_metrics_base.py || true
+      - name: Upload final Cycle 11 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle11-final
+          path: results/cycle11-final
+          retention-days: 30
