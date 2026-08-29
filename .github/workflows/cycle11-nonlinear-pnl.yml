@@ -29,9 +29,10 @@ jobs:
         run: |
           python -m py_compile research/autonomous_search_v3.py
           python -m py_compile research/cycle11_nonlinear_pnl_block.py
+          python -m py_compile research/cycle11_nonlinear_pnl_fixed_runner.py
       - name: Run causal weekly block
         run: |
-          python research/cycle11_nonlinear_pnl_block.py \
+          python research/cycle11_nonlinear_pnl_fixed_runner.py \
             --data-root . \
             --block-index ${{ matrix.block_index }} \
             --output results/cycle11-block-${{ matrix.block_index }}
@@ -73,6 +74,7 @@ jobs:
           mkdir -p results/cycle11-final
           cp research/CYCLE11_PROTOCOL.md results/cycle11-final/protocol.md || true
           cp research/cycle11_nonlinear_pnl_block.py results/cycle11-final/block_engine.py || true
+          cp research/cycle11_nonlinear_pnl_fixed_runner.py results/cycle11-final/fixed_runner.py || true
           cp research/cycle11_finalize.py results/cycle11-final/finalizer.py || true
           cp research/autonomous_search_v3.py results/cycle11-final/feature_metrics_base.py || true
       - name: Upload final Cycle 11 artifact
