@@ -86,10 +86,10 @@ def add_labels(f,m1,inst):
     eligible=np.array([signal_clock(t) for t in f.time],dtype=bool)
     for pid,p in PROFILES.items():
         for side,name in ((1,"LONG"),(-1,"SHORT")):
-            y=np.full(len(f),np.nan);ex=np.full(len(f),np.datetime64("NaT"),dtype="datetime64[ns]")
+            y=np.full(len(f),np.nan);ex=np.full(len(f),np.datetime64("NaT","ns"),dtype="datetime64[ns]")
             for i in np.flatnonzero(eligible):
                 r=isolated_trade(f,m1,int(i),inst,side,p,1)
-                if r is not None:y[i]=r["bps"];ex[i]=np.datetime64(r["exit_time"])
+                if r is not None:y[i]=r["bps"];ex[i]=np.datetime64(r["exit_time"],"ns")
             f[f"label_{pid}_{name}"]=y;f[f"exit_{pid}_{name}"]=ex
     f["eligible_clock"]=eligible
     return f
@@ -103,7 +103,7 @@ def pf_exp(y):
 
 
 def clean_X(df,features):
-    X=df[features].apply(pd.to_numeric,errors="coerce").to_numpy(float);X[~np.isfinite(X)]=np.nan;return X
+    X=df[features].apply(pd.to_numeric,errors="coerce").to_numpy(dtype=float,copy=True);X[~np.isfinite(X)]=np.nan;return X
 
 
 def fit_side_profile(pool,features,side_name,pid,block_start):
@@ -123,7 +123,6 @@ def fit_side_profile(pool,features,side_name,pid,block_start):
             pfe,ex=0.0,None;rank=(0,0.0,-1e9,-mse)
         candidates.append({"hp":hp,"mse":mse,"val_pred_p90":q,"tail_n":int(len(tail)),"tail_pf":pfe,"tail_expectancy_bps":ex,"rank":rank})
     best=max(candidates,key=lambda z:z["rank"]);hp=best["hp"]
-    # Threshold is frozen from the selected validation model, before refitting.
     threshold=max(0.0,float(best["val_pred_p90"]))
     model=HistGradientBoostingRegressor(**MODEL_CONST,**hp);model.fit(Xf,yf)
     return {"model":model,"threshold":threshold,"diagnostic":{"profile":pid,"side":side_name,"window_start":str(ws),"validation_start":str(vs),"old_rows":len(old),"validation_rows":len(val),"full_rows":len(full),"selected_hp":hp,"threshold":threshold,"selection":{k:v for k,v in best.items() if k not in ("hp","rank")}}}
@@ -136,11 +135,9 @@ def block_bounds(index:int):
 
 
 def choose_signals(contexts,features,models,start,end):
-    signals={inst:[] for inst in contexts}
-    pred_summary={}
+    signals={inst:[] for inst in contexts};pred_summary={}
     for inst,(f,m1,_) in contexts.items():
-        mask=(f.time>=start)&(f.time<end)&f.eligible_clock;idx=np.flatnonzero(mask.to_numpy())
-        last_key=None;chosen_count={}
+        mask=(f.time>=start)&(f.time<end)&f.eligible_clock;idx=np.flatnonzero(mask.to_numpy());last_key=None;chosen_count={}
         for i in idx:
             row=f.iloc[[i]];X=clean_X(row,features);choices=[]
             for pid in PROFILES:
@@ -149,12 +146,10 @@ def choose_signals(contexts,features,models,start,end):
                     if fit is None:continue
                     p=float(fit["model"].predict(X)[0]);thr=float(fit["threshold"])
                     if p>=thr:choices.append((p,pid,side_name,side,thr))
-            if not choices:
-                last_key=None;continue
+            if not choices:last_key=None;continue
             p,pid,side_name,side,thr=max(choices,key=lambda z:z[0]);key=(pid,side)
             if key!=last_key:
-                signals[inst].append({"signal_index":int(i),"signal_time":str(f.time.iloc[i]),"side":side,"profile":pid,"predicted_base_bps":p,"threshold":thr})
-                chosen_count[pid]=chosen_count.get(pid,0)+1
+                signals[inst].append({"signal_index":int(i),"signal_time":str(f.time.iloc[i]),"side":side,"profile":pid,"predicted_base_bps":p,"threshold":thr});chosen_count[pid]=chosen_count.get(pid,0)+1
             last_key=key
         pred_summary[inst]={"state_onsets":len(signals[inst]),"profiles":chosen_count}
     return signals,pred_summary
@@ -193,14 +188,12 @@ def execute_mixed(f,m1,signals,inst,friction_ticks):
 
 
 def run(root:Path,out:Path,index:int):
-    start,end=block_bounds(index);out.mkdir(parents=True,exist_ok=True);contexts={};features=None;provenance=[]
-    frames=[]
+    start,end=block_bounds(index);out.mkdir(parents=True,exist_ok=True);contexts={};features=None;provenance=[];frames=[]
     for inst in ("CNYRUBF","USDRUBF"):
         f,m1,feat,prov=load_context(root,inst);f=add_labels(f,m1,inst);contexts[inst]=(f,m1,prov);provenance+=prov
         if features is None:features=feat
         q=f.copy();q["instrument_key"]=inst;frames.append(q)
-    pool=pd.concat(frames,ignore_index=True,sort=False)
-    models={};diagnostics=[]
+    pool=pd.concat(frames,ignore_index=True,sort=False);models={};diagnostics=[]
     for pid in PROFILES:
         for side_name in ("LONG","SHORT"):
             fit=fit_side_profile(pool,features,side_name,pid,start);models[(pid,side_name)]=fit
