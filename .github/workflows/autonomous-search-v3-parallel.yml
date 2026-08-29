@@ -1,8 +1,6 @@
 name: Autonomous Discovery v3 Parallel
 
 on:
-  push:
-    branches: [autonomous-search-v3]
   workflow_dispatch:
 
 jobs:
