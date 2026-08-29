@@ -20,29 +20,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install numpy pandas
-      - name: Build audited runtime
+      - name: Compile cached runner
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          src=Path('research/autonomous_search_v2.py').read_text()
-          bad='ctx=contexts[(c["instrument"],c["timeframe"]);'
-          good='ctx=contexts[(c["instrument"],c["timeframe"])];'
-          if bad not in src:
-              raise SystemExit('expected one-line source typo not found')
-          fixed=src.replace(bad,good,1)
-          Path('/tmp/autonomous_search_v2_runtime.py').write_text(fixed)
-          PY
-          python -m py_compile /tmp/autonomous_search_v2_runtime.py
+          python -m py_compile research/autonomous_search_v2_fast_runner.py
       - name: Run full nested M1 M5 search
         run: |
-          python /tmp/autonomous_search_v2_runtime.py \
+          python research/autonomous_search_v2_fast_runner.py \
             --data-root . \
             --output results/autonomous-search-v2
-      - name: Save effective runtime
+      - name: Save effective source
         if: always()
         run: |
           mkdir -p results/autonomous-search-v2
-          cp /tmp/autonomous_search_v2_runtime.py results/autonomous-search-v2/effective_runtime.py || true
+          cp research/autonomous_search_v2.py results/autonomous-search-v2/source_engine.py || true
+          cp research/autonomous_search_v2_fast_runner.py results/autonomous-search-v2/fast_runner.py || true
       - name: Upload research artifacts
         if: always()
         uses: actions/upload-artifact@v4
