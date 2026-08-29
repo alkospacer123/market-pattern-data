@@ -1,0 +1,45 @@
+name: Cycle 10 Relative Value
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle10-relative-value.yml'
+  workflow_dispatch:
+
+jobs:
+  relative-value:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout discovery data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas
+      - name: Compile engines
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle10_relative_value.py
+      - name: Run Cycle 10
+        run: |
+          python research/cycle10_relative_value.py \
+            --data-root . \
+            --output results/cycle10-relative-value
+      - name: Save audit source
+        if: always()
+        run: |
+          mkdir -p results/cycle10-relative-value
+          cp research/CYCLE10_PROTOCOL.md results/cycle10-relative-value/protocol.md || true
+          cp research/cycle10_relative_value.py results/cycle10-relative-value/engine.py || true
+          cp research/autonomous_search_v3.py results/cycle10-relative-value/metrics_base.py || true
+      - name: Upload Cycle 10 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle10-relative-value
+          path: results/cycle10-relative-value
+          retention-days: 30
