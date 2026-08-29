@@ -38,9 +38,10 @@ jobs:
         run: |
           python -m py_compile research/autonomous_search_v3.py
           python -m py_compile research/autonomous_search_v4_events.py
+          python -m py_compile research/cycle4_event_search_fixed_runner.py
       - name: Run Cycle 4 event discovery
         run: |
-          python research/autonomous_search_v4_events.py \
+          python research/cycle4_event_search_fixed_runner.py \
             --data-root . \
             --output results/cycle4-${{ matrix.instrument }}-${{ matrix.timeframe }} \
             --instrument ${{ matrix.instrument }} \
@@ -51,6 +52,7 @@ jobs:
           mkdir -p results/cycle4-${{ matrix.instrument }}-${{ matrix.timeframe }}
           cp research/CYCLE4_PROTOCOL.md results/cycle4-${{ matrix.instrument }}-${{ matrix.timeframe }}/protocol.md || true
           cp research/autonomous_search_v4_events.py results/cycle4-${{ matrix.instrument }}-${{ matrix.timeframe }}/event_engine.py || true
+          cp research/cycle4_event_search_fixed_runner.py results/cycle4-${{ matrix.instrument }}-${{ matrix.timeframe }}/fixed_runner.py || true
           cp research/autonomous_search_v3.py results/cycle4-${{ matrix.instrument }}-${{ matrix.timeframe }}/execution_engine.py || true
       - name: Upload results
         if: always()
