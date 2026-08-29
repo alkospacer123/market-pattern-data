@@ -1,0 +1,20 @@
+name: Diagnose Equal Level Signals
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/diagnose-equal-levels.yml'
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy pandas
+      - run: python research/diagnose_equal_level_signals.py
