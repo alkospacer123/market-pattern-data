@@ -26,7 +26,7 @@ jobs:
           from pathlib import Path
           src=Path('research/autonomous_search_v2.py').read_text()
           bad='ctx=contexts[(c["instrument"],c["timeframe"]);'
-          good='ctx=contexts[(c["instrument"],c["timeframe"])]'
+          good='ctx=contexts[(c["instrument"],c["timeframe"])];'
           if bad not in src:
               raise SystemExit('expected one-line source typo not found')
           fixed=src.replace(bad,good,1)
@@ -40,7 +40,9 @@ jobs:
             --output results/autonomous-search-v2
       - name: Save effective runtime
         if: always()
-        run: cp /tmp/autonomous_search_v2_runtime.py results/autonomous-search-v2/effective_runtime.py || true
+        run: |
+          mkdir -p results/autonomous-search-v2
+          cp /tmp/autonomous_search_v2_runtime.py results/autonomous-search-v2/effective_runtime.py || true
       - name: Upload research artifacts
         if: always()
         uses: actions/upload-artifact@v4
