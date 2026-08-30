@@ -1,0 +1,51 @@
+name: Cycle 29 Structure-Aligned Passive Fixed Stop
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle29-structure-aligned-passive.yml'
+  workflow_dispatch:
+
+jobs:
+  search:
+    strategy:
+      fail-fast: false
+      matrix:
+        instrument: [CNYRUBF, USDRUBF]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - name: Checkout research data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas scikit-learn
+      - name: Compile engines
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle24_fixed_point_structural.py
+          python -m py_compile research/cycle27_fixed_stop_structural_event.py
+          python -m py_compile research/cycle29_structure_aligned_passive.py
+      - name: Run structure-aligned passive search
+        run: |
+          python research/cycle29_structure_aligned_passive.py \
+            --data-root . \
+            --instrument ${{ matrix.instrument }} \
+            --output results/cycle29-${{ matrix.instrument }}
+      - name: Save audit sources
+        if: always()
+        run: |
+          mkdir -p results/cycle29-${{ matrix.instrument }}
+          cp research/CYCLE29_PROTOCOL.md results/cycle29-${{ matrix.instrument }}/protocol.md || true
+          cp research/cycle29_structure_aligned_passive.py results/cycle29-${{ matrix.instrument }}/engine.py || true
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle29-${{ matrix.instrument }}
+          path: results/cycle29-${{ matrix.instrument }}
+          retention-days: 30
