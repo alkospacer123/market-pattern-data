@@ -1,0 +1,49 @@
+name: Cycle 23 High-R Rule-Family Generalization
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle23-rule-family.yml'
+  workflow_dispatch:
+
+jobs:
+  search:
+    strategy:
+      fail-fast: false
+      matrix:
+        instrument: [CNYRUBF, USDRUBF]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy pandas scikit-learn
+      - name: Compile engines
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle18_barrier_block.py
+          python -m py_compile research/cycle21_direct_high_r_rules.py
+          python -m py_compile research/cycle23_rule_family.py
+      - name: Run family search
+        run: |
+          python research/cycle23_rule_family.py \
+            --data-root . \
+            --instrument ${{ matrix.instrument }} \
+            --output results/cycle23-${{ matrix.instrument }}
+      - name: Save audit sources
+        if: always()
+        run: |
+          mkdir -p results/cycle23-${{ matrix.instrument }}
+          cp research/CYCLE23_PROTOCOL.md results/cycle23-${{ matrix.instrument }}/protocol.md || true
+          cp research/cycle23_rule_family.py results/cycle23-${{ matrix.instrument }}/engine.py || true
+          cp research/cycle21_direct_high_r_rules.py results/cycle23-${{ matrix.instrument }}/base_rule_engine.py || true
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle23-${{ matrix.instrument }}
+          path: results/cycle23-${{ matrix.instrument }}
+          retention-days: 30
