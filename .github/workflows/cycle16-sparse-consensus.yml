@@ -1,0 +1,87 @@
+name: Cycle 16 Sparse Consensus High-PF
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle16-sparse-consensus.yml'
+  workflow_dispatch:
+
+jobs:
+  block:
+    strategy:
+      fail-fast: false
+      max-parallel: 11
+      matrix:
+        block_index: [0,1,2,3,4,5,6,7,8,9,10]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout research data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas scikit-learn
+      - name: Compile frozen engines
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle11_nonlinear_pnl_block.py
+          python -m py_compile research/cycle16_sparse_consensus_block.py
+          python -m py_compile research/cycle16_finalize.py
+      - name: Run causal sparse-consensus block
+        run: |
+          python research/cycle16_sparse_consensus_block.py \
+            --data-root . \
+            --block-index ${{ matrix.block_index }} \
+            --output results/cycle16-block-${{ matrix.block_index }}
+      - name: Upload block
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle16-block-${{ matrix.block_index }}
+          path: results/cycle16-block-${{ matrix.block_index }}
+          retention-days: 30
+
+  finalize:
+    needs: block
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout audit code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas
+      - name: Download block artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cycle16-block-*
+          path: results/cycle16-blocks
+      - name: Finalize Cycle 16
+        run: |
+          python research/cycle16_finalize.py \
+            --block-root results/cycle16-blocks \
+            --output results/cycle16-final
+      - name: Save audit sources
+        if: always()
+        run: |
+          mkdir -p results/cycle16-final
+          cp research/CYCLE16_PROTOCOL.md results/cycle16-final/protocol.md || true
+          cp research/cycle16_sparse_consensus_block.py results/cycle16-final/block_engine.py || true
+          cp research/cycle16_finalize.py results/cycle16-final/finalizer.py || true
+          cp research/cycle11_nonlinear_pnl_block.py results/cycle16-final/execution_label_engine.py || true
+          cp research/profitable_systems_registry.json results/cycle16-final/profitable_systems_registry.json || true
+      - name: Upload final Cycle 16 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle16-final
+          path: results/cycle16-final
+          retention-days: 30
