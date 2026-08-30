@@ -1,0 +1,75 @@
+{
+  "registry_version": 1,
+  "updated_after_cycle": 14,
+  "purpose": "Persistent registry of research candidates that showed positive executable BASE performance at some preregistered stage. Registry inclusion does not imply validation or production readiness.",
+  "status_legend": {
+    "research_positive": "Positive executable result observed, but strict research-survivor gate not passed.",
+    "discovery_survivor": "Passed the preregistered discovery/research gate; requires untouched confirmation.",
+    "confirmation_failed": "Previously passed discovery but failed an untouched confirmation window.",
+    "validated": "Passed untouched confirmation. None as of registry_version 1."
+  },
+  "fences": {
+    "retired_2026_05_16_through_2026_07_01_must_not_be_reused_for_selection": true,
+    "true_oos_2025_sealed": true
+  },
+  "candidates": [
+    {
+      "id": "C1-TOP-OOF",
+      "cycle": 1,
+      "status": "research_positive",
+      "instrument_context": "autonomous sparse rule mining",
+      "base_pf": 2.6255,
+      "base_expectancy_bps": 4.378,
+      "base_trades": 29,
+      "stress_pf": 1.6025,
+      "stress_expectancy_bps": 2.194,
+      "reason_not_promoted": "Minimum trades gate missed: 29 < 30. Subsequent adaptive deployment was strongly negative."
+    },
+    {
+      "id": "C2-USDRUBF-M5-TOP",
+      "cycle": 2,
+      "status": "research_positive",
+      "instrument_context": "USDRUBF M5 January-selected frozen walk-forward",
+      "base_pf": 2.4183,
+      "base_expectancy_bps": 8.754,
+      "base_trades": 17,
+      "stress_pf": 1.8325,
+      "stress_expectancy_bps": 6.236,
+      "reason_not_promoted": "Too few trades/days/folds and excessive winner concentration."
+    },
+    {
+      "id": "A3-USDRUBF-M5-049",
+      "cycle": 3,
+      "status": "confirmation_failed",
+      "instrument_context": "USDRUBF M5",
+      "rule": "dist_high_120m_atr HIGH25 AND dist_low_15m_atr HIGH10; SHORT",
+      "execution": {
+        "stop_atr14": 1.25,
+        "target_r": 1.5,
+        "max_hold_minutes": 120,
+        "entry": "exact next M1 open"
+      },
+      "discovery": {
+        "base_pf": 2.622743830772824,
+        "base_expectancy_bps": 6.451295310167864,
+        "base_trades": 32,
+        "stress_pf": 1.7971959420290036,
+        "stress_expectancy_bps": 3.8760279244999443,
+        "positive_months": 3,
+        "unique_days": 25,
+        "stable_neighbors": 4
+      },
+      "untouched_internal_confirmation": {
+        "window": "2026-05-16 through 2026-07-01 inclusive; now permanently retired",
+        "base_pf": 0.4868108121232871,
+        "base_expectancy_bps": -4.980255818,
+        "base_trades": 24,
+        "stress_pf": 0.3239547637,
+        "stress_expectancy_bps": -7.7039465386,
+        "result": "FAILED"
+      },
+      "reason_not_promoted": "Failed untouched Internal Confirmation. Preserve as a discovered but non-transferable historical pattern; never trade or retune using the retired confirmation window."
+    }
+  ],
+  "validated_systems": []
+}
