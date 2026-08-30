@@ -1,0 +1,91 @@
+name: Cycle 17 High-R Expectancy Discovery
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle17-high-r-expectancy.yml'
+  workflow_dispatch:
+
+jobs:
+  block:
+    strategy:
+      fail-fast: false
+      max-parallel: 11
+      matrix:
+        block_index: [0,1,2,3,4,5,6,7,8,9,10]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - name: Checkout research data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas scikit-learn
+      - name: Compile engines
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle11_nonlinear_pnl_block.py
+          python -m py_compile research/cycle13_cross_leadlag_block.py
+          python -m py_compile research/cycle14_m1_micro_block.py
+          python -m py_compile research/cycle14_m1_micro_fast_runner.py
+          python -m py_compile research/cycle16_sparse_block.py
+          python -m py_compile research/cycle17_high_r_block.py
+          python -m py_compile research/cycle17_finalize.py
+      - name: Run causal high-R discovery block
+        run: |
+          python research/cycle17_high_r_block.py \
+            --data-root . \
+            --block-index ${{ matrix.block_index }} \
+            --output results/cycle17-block-${{ matrix.block_index }}
+      - name: Upload block
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle17-block-${{ matrix.block_index }}
+          path: results/cycle17-block-${{ matrix.block_index }}
+          retention-days: 30
+
+  finalize:
+    needs: block
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout audit code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas
+      - name: Download block artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cycle17-block-*
+          path: results/cycle17-blocks
+      - name: Finalize Cycle 17
+        run: |
+          python research/cycle17_finalize.py \
+            --block-root results/cycle17-blocks \
+            --output results/cycle17-final
+      - name: Save audit sources
+        if: always()
+        run: |
+          mkdir -p results/cycle17-final
+          cp research/CYCLE17_PROTOCOL.md results/cycle17-final/protocol.md || true
+          cp research/cycle17_high_r_block.py results/cycle17-final/block_engine.py || true
+          cp research/cycle17_finalize.py results/cycle17-final/finalizer.py || true
+          cp research/cycle16_sparse_block.py results/cycle17-final/feature_engine.py || true
+          cp research/cycle11_nonlinear_pnl_block.py results/cycle17-final/execution_label_engine.py || true
+      - name: Upload final Cycle 17 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle17-final
+          path: results/cycle17-final
+          retention-days: 30
