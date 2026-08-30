@@ -1,3 +1,4 @@
+# Queue trigger only; Cycle 21 protocol and research semantics unchanged.
 name: Cycle 21 Direct High-R Rule Mining
 
 on:
