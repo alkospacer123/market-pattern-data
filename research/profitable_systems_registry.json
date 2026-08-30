@@ -1,16 +1,19 @@
 {
-  "registry_version": 1,
-  "updated_after_cycle": 14,
-  "purpose": "Persistent registry of research candidates that showed positive executable BASE performance at some preregistered stage. Registry inclusion does not imply validation or production readiness.",
+  "registry_version": 2,
+  "updated_after_cycle": 28,
+  "cycle_29_status_at_update": "in_progress",
+  "purpose": "Persistent registry of executable research candidates that produced positive BASE performance at a preregistered forward/research stage. Registry inclusion preserves a discovered pattern; it does not imply validation or production readiness.",
   "status_legend": {
-    "research_positive": "Positive executable result observed, but strict research-survivor gate not passed.",
-    "discovery_survivor": "Passed the preregistered discovery/research gate; requires untouched confirmation.",
+    "research_positive": "Positive executable forward/research result observed, but the strict research-survivor gate was not passed.",
+    "discovery_survivor": "Passed the preregistered discovery/research gate and requires genuinely untouched confirmation.",
     "confirmation_failed": "Previously passed discovery but failed an untouched confirmation window.",
-    "validated": "Passed untouched confirmation. None as of registry_version 1."
+    "validated": "Passed genuinely untouched confirmation. None as of registry_version 2."
   },
   "fences": {
     "retired_2026_05_16_through_2026_07_01_must_not_be_reused_for_selection": true,
-    "true_oos_2025_sealed": true
+    "true_oos_2025_sealed": true,
+    "march_through_may15_is_research_only_after_repeated_inspection": true,
+    "new_survivors_must_wait_for_genuinely_new_untouched_confirmation_data": true
   },
   "candidates": [
     {
@@ -69,7 +72,216 @@
         "result": "FAILED"
       },
       "reason_not_promoted": "Failed untouched Internal Confirmation. Preserve as a discovered but non-transferable historical pattern; never trade or retune using the retired confirmation window."
+    },
+    {
+      "id": "C17-CNY-HIGH-R-CAUSAL",
+      "cycle": 17,
+      "status": "research_positive",
+      "instrument_context": "CNYRUBF causal high-R weekly discovery family",
+      "forward": {
+        "base_pf": 1.312,
+        "base_expectancy_bps": 2.1033809202557032,
+        "base_mean_r": 0.28694634933017454,
+        "base_trades": 41,
+        "stress_pf": 1.043,
+        "stress_mean_r": 0.06590767776903132
+      },
+      "reason_not_promoted": "Combined Cycle 17 failed strict PF/mean-R/bootstrap/month gates; the CNY component remained positive and is preserved as a research clue."
+    },
+    {
+      "id": "C21-CNY-HIGH-R-R4",
+      "cycle": 21,
+      "status": "research_positive",
+      "instrument_context": "CNYRUBF M5",
+      "rule": "dist_low_240m_atr:HIGH10 AND eff_30m:LOW10; SHORT",
+      "execution": {
+        "profile": "R4",
+        "stop_atr": 0.75,
+        "target_r": 4.0,
+        "max_hold_minutes": 90
+      },
+      "forward": {
+        "base_pf": 3.7009055270366225,
+        "base_expectancy_r": 1.258701666317406,
+        "base_trades": 6,
+        "unique_days": 6,
+        "stress_pf": 2.901076623330681,
+        "stress_expectancy_r": 1.0174033326348182
+      },
+      "neighbor": {
+        "profile": "R3",
+        "target_r": 6.0,
+        "base_pf": 2.541742898989296,
+        "stress_pf": 1.904176186909127,
+        "trades": 6
+      },
+      "reason_not_promoted": "Very high forward PF but only six trades; preserved only as a sparse-state clue."
+    },
+    {
+      "id": "C23-CNY-FAMILY-F1",
+      "cycle": 23,
+      "status": "research_positive",
+      "instrument_context": "CNYRUBF M5 high-R rule-family generalization",
+      "rule": "OR_SUB_A: [dist_low_240m_atr:HIGH10 & eff_30m:LOW10] OR [dist_low_120m_atr:HIGH10 & eff_30m:LOW10]; SHORT",
+      "execution": {
+        "profile": "F1",
+        "profile_tuple": [0.75, 4.0, 90]
+      },
+      "forward": {
+        "base_pf": 1.742572400560609,
+        "base_expectancy_bps": 4.752502861503179,
+        "base_expectancy_r": 0.22035456687826294,
+        "base_trades": 31,
+        "unique_days": 19,
+        "stress_pf": 1.4004773710804541,
+        "stress_expectancy_bps": 3.0113470579231314,
+        "stress_expectancy_r": 0.012772815210722382,
+        "positive_base_months": 3,
+        "positive_stress_months": 3,
+        "largest_base_winner_share": 0.22405150476169156,
+        "bootstrap_p10_base_mean_r": -0.23717892530345797
+      },
+      "reason_not_promoted": "Good forward PF, trade count and positive calendar months, but bootstrap lower tail was negative and strict research gate failed."
+    },
+    {
+      "id": "C23-CNY-H15-DISTLOW-F4",
+      "cycle": 23,
+      "status": "research_positive",
+      "instrument_context": "CNYRUBF M5 high-R rule-family generalization",
+      "rule": "OR_SUB_B: [clock_hour:H15 & dist_low_240m_atr:HIGH25] OR [clock_hour:H15 & dist_low_30m_atr:HIGH25]; SHORT",
+      "execution": {
+        "profile": "F4"
+      },
+      "forward": {
+        "base_pf": 1.4831947807332846,
+        "base_expectancy_r": 0.22989631360205612,
+        "base_trades": 69,
+        "unique_days": 48,
+        "stress_pf": 1.1875693045680908,
+        "stress_expectancy_r": 0.03489275913869602
+      },
+      "reason_not_promoted": "Large sample and positive BASE/STRESS expectancy, but stress margin and bootstrap robustness were below the strict survivor requirements."
+    },
+    {
+      "id": "C27-USDRUBF-REJ-R30-SL12-TP4-0912",
+      "cycle": 27,
+      "status": "research_positive",
+      "instrument_context": "USDRUBF structural fixed-stop events",
+      "rule": "SHORT REJECTION of ROLL30, stop anchor EVENT_EXTREME, clock_bucket 09_12",
+      "execution": {
+        "stop_points": 12,
+        "target_r": 4.0
+      },
+      "forward": {
+        "gross_pf": 2.60955707478704,
+        "base_pf": 2.130450147977564,
+        "base_expectancy_bps": 11.569742776977277,
+        "base_expectancy_r": 0.7738095238095087,
+        "base_trades": 21,
+        "unique_days": 19,
+        "largest_base_winner_share": 0.13328962827751703,
+        "stress_pf": 1.7711199528704542,
+        "stress_expectancy_bps": 9.019577121169485,
+        "stress_expectancy_r": 0.607142857142842,
+        "bootstrap_p10_base_r": 0.18053571428569037
+      },
+      "neighbor": {
+        "target_r": 3.0,
+        "base_pf": 2.1251413681996603,
+        "stress_pf": 1.6806112721551538,
+        "base_expectancy_r": 0.595238095238079,
+        "stress_expectancy_r": 0.42857142857141234,
+        "trades": 21
+      },
+      "reason_not_promoted": "Strong PF under BASE/STRESS with positive bootstrap and stable 3R/4R neighbor, but only 21 trades and the April STRESS block was slightly negative. This is a priority research-positive family for future untouched confirmation, not a validated system."
+    },
+    {
+      "id": "C27-CNY-EQUAL-REJ-LVL-SL10-TP4-1518",
+      "cycle": 27,
+      "status": "research_positive",
+      "instrument_context": "CNYRUBF structural fixed-stop events",
+      "rule": "SHORT REJECTION of EQUAL_CLUSTER, LEVEL stop anchor, clock_bucket 15_18",
+      "execution": {
+        "stop_points": 10,
+        "target_r": 4.0
+      },
+      "forward": {
+        "base_pf": 1.6525409995241698,
+        "base_expectancy_bps": 3.7913318884154656,
+        "base_expectancy_r": 0.4208333333333149,
+        "base_trades": 24,
+        "unique_days": 22,
+        "stress_pf": 1.2973400948131844,
+        "stress_expectancy_bps": 2.0308219128607696,
+        "stress_expectancy_r": 0.22083333333331498,
+        "bootstrap_p10_base_r": -0.12608695652174923
+      },
+      "reason_not_promoted": "Positive BASE/STRESS, but sample is below 30 and March plus bootstrap lower tail were negative."
+    },
+    {
+      "id": "C28-CNY-M1FRACTAL-REJECT-SL8-T5H240-1518",
+      "cycle": 28,
+      "status": "research_positive",
+      "instrument_context": "CNYRUBF M1 fixed-stop microstructure",
+      "rule": "SHORT REJECT_FOLLOW of M1_FRACTAL, LEVEL anchor, clock_bucket 15_18",
+      "execution": {
+        "stop_points": 8,
+        "target_profile": "T5H240",
+        "target_r": 5.0,
+        "hold_minutes": 240
+      },
+      "forward": {
+        "gross_pf": 2.065836779280387,
+        "base_pf": 1.5232267237004269,
+        "base_expectancy_bps": 2.846463838769968,
+        "base_expectancy_r": 0.41193181818186014,
+        "base_trades": 44,
+        "unique_days": 38,
+        "largest_base_winner_share": 0.09606405324588144,
+        "stress_pf": 1.165839520857937,
+        "stress_expectancy_bps": 1.0878786028821745,
+        "stress_expectancy_r": 0.1619318181818601,
+        "bootstrap_p10_base_r": -0.014943097476441266,
+        "all_base_blocks_positive": true,
+        "all_stress_blocks_positive": true
+      },
+      "reason_not_promoted": "Broad and temporally consistent positive sample, but STRESS PF and bootstrap lower tail missed the strict survivor thresholds. Preserve as a priority structural family."
+    },
+    {
+      "id": "C28-USDRUBF-EQUAL-REJECT-LONG-SL12-T3H60-1215",
+      "cycle": 28,
+      "status": "research_positive",
+      "instrument_context": "USDRUBF M1 fixed-stop microstructure",
+      "rule": "LONG REJECT_FOLLOW of EQUAL_CLUSTER, LEVEL anchor, clock_bucket 12_15",
+      "execution": {
+        "stop_points": 12,
+        "target_profile": "T3H60",
+        "target_r": 3.0,
+        "hold_minutes": 60
+      },
+      "forward": {
+        "gross_pf": 2.1990646445454014,
+        "base_pf": 1.6494485989822898,
+        "base_expectancy_bps": 4.905869587470765,
+        "base_expectancy_r": 0.3355263157894532,
+        "base_trades": 38,
+        "unique_days": 28,
+        "largest_base_winner_share": 0.09600276053758722,
+        "stress_pf": 1.2619895189316377,
+        "stress_expectancy_bps": 2.3449444002766513,
+        "stress_expectancy_r": 0.16885964912278661,
+        "bootstrap_p10_base_r": 0.004605263157864616,
+        "all_base_blocks_positive": false,
+        "all_stress_blocks_positive": false
+      },
+      "reason_not_promoted": "Good overall PF and positive bootstrap with sufficient N, but May 1-15 was sharply negative and strict temporal-consistency/stress gates failed."
     }
+  ],
+  "priority_research_families": [
+    "C27-USDRUBF-REJ-R30-SL12-TP4-0912",
+    "C28-CNY-M1FRACTAL-REJECT-SL8-T5H240-1518",
+    "C28-USDRUBF-EQUAL-REJECT-LONG-SL12-T3H60-1215",
+    "C23-CNY-FAMILY-F1"
   ],
   "validated_systems": []
 }
