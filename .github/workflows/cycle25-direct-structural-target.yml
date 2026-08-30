@@ -1,0 +1,51 @@
+name: Cycle 25 Direct Structural Targets
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle25-direct-structural-target.yml'
+  workflow_dispatch:
+
+jobs:
+  search:
+    strategy:
+      fail-fast: false
+      matrix:
+        instrument: [CNYRUBF, USDRUBF]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout research data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas scikit-learn
+      - name: Compile engine
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle24_fixed_point_structural.py
+          python -m py_compile research/cycle25_direct_structural_target.py
+      - name: Run direct structural target search
+        run: |
+          python research/cycle25_direct_structural_target.py \
+            --data-root . \
+            --instrument ${{ matrix.instrument }} \
+            --output results/cycle25-${{ matrix.instrument }}
+      - name: Save audit sources
+        if: always()
+        run: |
+          mkdir -p results/cycle25-${{ matrix.instrument }}
+          cp research/CYCLE25_PROTOCOL.md results/cycle25-${{ matrix.instrument }}/protocol.md || true
+          cp research/cycle25_direct_structural_target.py results/cycle25-${{ matrix.instrument }}/engine.py || true
+          cp research/cycle24_fixed_point_structural.py results/cycle25-${{ matrix.instrument }}/base_engine.py || true
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle25-${{ matrix.instrument }}
+          path: results/cycle25-${{ matrix.instrument }}
+          retention-days: 30
