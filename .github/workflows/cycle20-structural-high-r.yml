@@ -1,3 +1,4 @@
+# Queue trigger only; Cycle 20 protocol and research semantics unchanged.
 name: Cycle 20 Structural High-R Discovery
 
 on:
