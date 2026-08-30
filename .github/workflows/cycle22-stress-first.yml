@@ -1,0 +1,87 @@
+name: Cycle 22 Stress-First High-R Cost-Margin
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle22-stress-first.yml'
+  workflow_dispatch:
+
+jobs:
+  block:
+    strategy:
+      fail-fast: false
+      max-parallel: 11
+      matrix:
+        block_index: [0,1,2,3,4,5,6,7,8,9,10]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout research data
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas scikit-learn
+      - name: Compile engines
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle14_m1_micro_fast_runner.py
+          python -m py_compile research/cycle16_sparse_block.py
+          python -m py_compile research/cycle18_barrier_block.py
+          python -m py_compile research/cycle22_stress_first_block.py
+      - name: Run stress-first block
+        run: |
+          python research/cycle22_stress_first_block.py \
+            --data-root . \
+            --block-index ${{ matrix.block_index }} \
+            --output results/cycle22-block-${{ matrix.block_index }}
+      - name: Upload block
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle22-block-${{ matrix.block_index }}
+          path: results/cycle22-block-${{ matrix.block_index }}
+          retention-days: 30
+
+  finalize:
+    needs: block
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout audit code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas
+      - name: Download block artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cycle22-block-*
+          path: results/cycle22-blocks
+      - name: Finalize Cycle 22
+        run: |
+          python research/cycle22_finalize.py \
+            --block-root results/cycle22-blocks \
+            --output results/cycle22-final
+      - name: Save audit sources
+        if: always()
+        run: |
+          mkdir -p results/cycle22-final
+          cp research/CYCLE22_PROTOCOL.md results/cycle22-final/protocol.md || true
+          cp research/CYCLE22_IMPLEMENTATION_NOTE.md results/cycle22-final/implementation_note.md || true
+          cp research/cycle22_stress_first_block.py results/cycle22-final/block_engine.py || true
+          cp research/cycle22_finalize.py results/cycle22-final/finalizer.py || true
+      - name: Upload final
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle22-final
+          path: results/cycle22-final
+          retention-days: 30
