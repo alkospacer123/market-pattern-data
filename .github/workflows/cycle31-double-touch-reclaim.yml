@@ -1,0 +1,54 @@
+name: Cycle 31 Probe Reclaim Second Touch
+
+on:
+  push:
+    branches: [autonomous-search-v3]
+    paths:
+      - '.github/workflows/cycle31-double-touch-reclaim.yml'
+  workflow_dispatch:
+
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        instrument: [CNYRUBF, USDRUBF]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install numpy pandas
+      - name: Compile causal engines
+        run: |
+          python -m py_compile research/autonomous_search_v3.py
+          python -m py_compile research/cycle24_fixed_point_structural.py
+          python -m py_compile research/cycle27_fixed_stop_structural_event.py
+          python -m py_compile research/cycle29_structure_aligned_passive.py
+          python -m py_compile research/cycle31_double_touch_reclaim.py
+      - name: Run preregistered Cycle 31
+        run: |
+          python research/cycle31_double_touch_reclaim.py \
+            --data-root . \
+            --instrument ${{ matrix.instrument }} \
+            --output results/cycle31-${{ matrix.instrument }}
+      - name: Save audit protocol
+        if: always()
+        run: |
+          mkdir -p results/cycle31-${{ matrix.instrument }}
+          cp research/CYCLE31_PROTOCOL.md results/cycle31-${{ matrix.instrument }}/protocol.md || true
+          cp research/cycle31_double_touch_reclaim.py results/cycle31-${{ matrix.instrument }}/cycle31_engine.py || true
+          cp research/cycle29_structure_aligned_passive.py results/cycle31-${{ matrix.instrument }}/base_candidate_engine.py || true
+      - name: Upload Cycle 31 instrument artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle31-${{ matrix.instrument }}
+          path: results/cycle31-${{ matrix.instrument }}
+          retention-days: 30
