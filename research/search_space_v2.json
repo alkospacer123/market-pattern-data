@@ -1,0 +1,96 @@
+{
+  "version": "2.0",
+  "effective_after_cycle": 31,
+  "formal_discovery": {
+    "selection_window": ["2026-01-05", "2026-03-01"],
+    "research_forward_window": ["2026-03-01", "2026-05-16"],
+    "retired_window": ["2026-05-16", "2026-07-02"],
+    "true_oos_2025_sealed": true
+  },
+  "instruments": ["CNYRUBF", "USDRUBF"],
+  "signal_timeframes": ["M1", "M5"],
+  "simple_primitives": [
+    "ROUND_TOUCH",
+    "EQUAL_CLUSTER",
+    "PREV_DAY",
+    "PREV_SESSION",
+    "OPEN_RANGE",
+    "ROLLING_EXTREME",
+    "CAUSAL_FRACTAL",
+    "COMPRESSION"
+  ],
+  "optional_refinements": [
+    "NONE",
+    "REJECTION",
+    "SWEEP_RECLAIM",
+    "BREAK_RETEST",
+    "BROAD_VOL_STATE",
+    "BROAD_EFFICIENCY_STATE",
+    "BROAD_TREND_STATE",
+    "CLOCK_BUCKET"
+  ],
+  "touch_templates": {
+    "CONSECUTIVE": {
+      "n": [2, 3, 4, 5]
+    },
+    "WINDOW": {
+      "required_touches": [2, 3, 4, 5],
+      "window_bars": [3, 5, 7, 9],
+      "constraint": "required_touches <= window_bars"
+    }
+  },
+  "round_steps": {
+    "CNYRUBF": 0.05,
+    "USDRUBF": 0.10
+  },
+  "touch_tolerance_ticks": [0, 1, 2],
+  "directions": ["LONG", "SHORT", "BOTH"],
+  "fixed_stop_ticks": {
+    "CNYRUBF": [3, 4, 5, 6, 8, 10],
+    "USDRUBF": [3, 4, 5, 6, 8, 9, 12, 15, 20]
+  },
+  "buffer_ticks": [1, 2, 3, 4],
+  "target_r": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "entry_contract": {
+    "M1": "signal_after_completed_M1_close__entry_no_earlier_than_next_causal_M1_open",
+    "M5": "signal_after_completed_M5_close__execution_only_on_subsequent_M1_data",
+    "same_signal_bar_close_fill_forbidden": true,
+    "lookahead_forbidden": true
+  },
+  "execution": {
+    "scenarios": ["GROSS", "BASE", "STRESS"],
+    "stop_first_same_bar": true,
+    "fill_bar_target_credit": false,
+    "favorable_target_gap_improvement": false,
+    "one_position_per_candidate_instrument": true
+  },
+  "ranking_views": [
+    "TOP_PF",
+    "TOP_EXPECTANCY",
+    "TOP_TOTAL_R",
+    "TOP_ROBUST",
+    "TOP_SAMPLE"
+  ],
+  "selection_unit": "SEMANTIC_CLUSTER_AND_PARAMETER_PLATEAU",
+  "cluster_requirements": [
+    "positive_one_axis_neighbor_count",
+    "neighbor_pf_expectancy_dispersion",
+    "temporal_consistency",
+    "winner_concentration",
+    "trade_and_date_count",
+    "non_binding_axis_detection"
+  ],
+  "historical_cmd": {
+    "allowed_use": "architecture_calibration_only",
+    "exact_winner_seed_in_formal_discovery": false,
+    "historical_calibration_can_promote_survivor": false,
+    "legacy_same_close_replay": "diagnostic_only",
+    "causal_next_open_replay": "diagnostic_only"
+  },
+  "continuous_search": {
+    "target_independent_discovery_survivors": 3,
+    "start_next_cycle_immediately_after_completion": true,
+    "hourly_orchestrator_role": "watchdog_heartbeat",
+    "persist_all_executable_positive_candidates": true
+  }
+}
