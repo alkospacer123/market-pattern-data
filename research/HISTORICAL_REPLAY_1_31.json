@@ -1,11 +1,11 @@
 {
-  "version": 1,
+  "version": 2,
   "purpose": "Reproduce the historical research sequence before post-Cycle31 audit and autonomous continuation.",
-  "data_root_policy": "Use the local checkout data files; never run retired Cycle-3 internal confirmation and never read sealed 2025 TRUE OOS.",
+  "data_root_policy": "Every replayable cycle receives a fenced local data mirror ending strictly before 2026-05-16. Retired 2026-05-16 through 2026-07-01 and sealed 2025 are not exposed to replay engines.",
   "snapshots": {
-    "legacy_1_14": {
+    "legacy_1_15": {
       "commit": "fdf6f5ff08221050512d7a3f08f1dc8bd82b4ed6",
-      "description": "Final effective legacy snapshot after the Cycle14 index-based rerun. Contains the effective Cycle1-14 engines/workflows."
+      "description": "Final effective legacy snapshot after the Cycle14 index-based rerun. Contains the effective Cycle1-14 engines/workflows and the preregistered Cycle15 protocol."
     },
     "modern_16_31": {
       "commit": "53b2fbe07bf2b1cd6e7ac4a0d596ba72ef252826",
@@ -16,21 +16,21 @@
     {
       "id": 1,
       "name": "Autonomous Sparse State/Rule Search",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "SINGLE",
       "script": "autonomous_search_v1.py"
     },
     {
       "id": 2,
       "name": "Frozen January Candidate Walk-Forward",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "SINGLE",
       "script": "autonomous_search_v2_fast_runner.py"
     },
     {
       "id": 3,
       "name": "Stable-State High-PF Discovery",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "SINGLE",
       "script": "autonomous_search_v3.py",
       "note": "Replay discovery only. Do NOT replay the retired May16-Jul1 internal confirmation."
@@ -38,7 +38,7 @@
     {
       "id": 4,
       "name": "Causal Event Families",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "INSTRUMENT_TIMEFRAME_MATRIX",
       "script": "cycle4_event_search_fixed_runner.py",
       "instruments": ["CNYRUBF", "USDRUBF"],
@@ -47,49 +47,49 @@
     {
       "id": 5,
       "name": "Weekly Adaptive Event Selector",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "SINGLE",
       "script": "cycle5_adaptive_selector.py"
     },
     {
       "id": 6,
       "name": "Pooled Causal Ridge Return Forecast",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "SINGLE",
       "script": "cycle6_pooled_ridge.py"
     },
     {
       "id": 7,
       "name": "Equal High/Low Round-Level Reversal",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "SINGLE",
       "script": "cycle7_equal_levels.py"
     },
     {
       "id": 8,
       "name": "Passive Retest of Equal Level",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "SINGLE",
       "script": "cycle8_passive_retest.py"
     },
     {
       "id": 9,
       "name": "Equal-Level Liquidity Breakout",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "SINGLE",
       "script": "cycle9_equal_level_breakout_runner.py"
     },
     {
       "id": 10,
       "name": "CNY/Si Relative Value",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "SINGLE",
       "script": "cycle10_relative_value.py"
     },
     {
       "id": 11,
       "name": "Nonlinear Executable-PnL ML",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "BLOCKED",
       "script": "cycle11_nonlinear_pnl_fixed_runner.py",
       "blocks": 11,
@@ -98,7 +98,7 @@
     {
       "id": 12,
       "name": "Historical Analog Mining",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "BLOCKED",
       "script": "cycle12_analog_block.py",
       "blocks": 11,
@@ -107,7 +107,7 @@
     {
       "id": 13,
       "name": "Cross-Instrument Lead/Lag ML",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "BLOCKED",
       "script": "cycle13_cross_leadlag_block.py",
       "blocks": 11,
@@ -116,7 +116,7 @@
     {
       "id": 14,
       "name": "M1 Microstructure ML",
-      "snapshot": "legacy_1_14",
+      "snapshot": "legacy_1_15",
       "mode": "BLOCKED",
       "script": "cycle14_m1_micro_fast_runner.py",
       "blocks": 11,
@@ -124,9 +124,12 @@
     },
     {
       "id": 15,
-      "name": "Historical Numbering Gap",
-      "mode": "HISTORICAL_GAP",
-      "reason": "No Cycle15 implementation, workflow, protocol, or ledger entry was found in repository history. Do not fabricate a replay."
+      "name": "Full-Session Causal Executable-PnL Discovery",
+      "snapshot": "legacy_1_15",
+      "mode": "PREREGISTERED_NOT_IMPLEMENTED",
+      "protocol": "CYCLE15_PROTOCOL.md",
+      "preregister_commit": "c0b42e2b63f7676d0e002f7e0a930288de7d8e1e",
+      "reason": "Cycle15 was preregistered, but no executable Cycle15 engine, workflow, finalizer, or historical result was found. Historical replay must not fabricate an execution result."
     },
     {
       "id": 16,
