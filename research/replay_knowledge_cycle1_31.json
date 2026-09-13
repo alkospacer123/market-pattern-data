@@ -1,0 +1,50 @@
+{
+  "audit_scope": "Cycle1-Cycle31 Intel replay",
+  "implemented_cycles": 30,
+  "preregistered_not_implemented": [15],
+  "strict_research_forward_survivors": [
+    {
+      "id": "A3-USDRUBF-M5-049",
+      "cycle": 3,
+      "research_gate_pass": true,
+      "current_lifecycle_status": "confirmation_failed",
+      "forward_base_pf": 2.622743830772824,
+      "forward_stress_pf": 1.7971959420290036,
+      "forward_n": 32
+    }
+  ],
+  "validated_live_candidates": [],
+  "top_research_positive_cluster": {
+    "cycle": 29,
+    "instrument": "CNYRUBF",
+    "direction": "SHORT",
+    "family": "REJECTION / ROUND / high eff_60m / passive high-R",
+    "best_candidate": "CNYRUBF|SHORT|REJECTION|ROUND|EVENT_EXTREME|SL10|B2|TTL15|TP6R|eff_60m:HIGH25",
+    "forward_base_pf": 3.3170177776968233,
+    "forward_stress_pf": 2.9770393481719526,
+    "forward_base_n": 16,
+    "bootstrap_p10_base_r": 0.45000000000006163,
+    "strict_gate_failure": "sample size"
+  },
+  "dead_or_low_priority_families": [
+    "pooled ridge broad prediction",
+    "historical analog mining",
+    "standalone equal-level breakout",
+    "simple passive retest",
+    "Cycle30 probe-reclaim entry geometry",
+    "broad M1 microstructure as implemented"
+  ],
+  "recurring_positive_semantics": [
+    "CNY short-side structural/rejection",
+    "round/rolling level anchors",
+    "high directional-efficiency contexts",
+    "sparse high-R events",
+    "passive entries when paired with strong state filters"
+  ],
+  "research_fences": {
+    "research_end_exclusive": "2026-05-16",
+    "retired_2026_05_16_to_2026_07_01": "DO_NOT_REOPEN_FOR_SELECTION",
+    "true_oos_2025": "SEALED",
+    "new_survivor_requires_genuinely_new_untouched_confirmation": true
+  }
+}
