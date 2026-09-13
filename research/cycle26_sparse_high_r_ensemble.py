@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import datetime as dt
 from pathlib import Path
 
 import numpy as np
@@ -21,6 +22,12 @@ PROFILES = {
 }
 BOOTSTRAP_SEED = 20260401
 BOOTSTRAP_REPS = 1000
+
+
+def jsonable(v):
+    if isinstance(v, (dt.date, dt.datetime)):
+        return v.isoformat()
+    return c21.jsonable(v)
 
 
 def mod(path: str, name: str):
@@ -274,8 +281,8 @@ def run(root: Path, out: Path, inst: str):
         "forward_gate_pass": passed, "forward_gate_failures": fail, "forward": forward,
         "forward_component_contributions": component_contributions(gb), "january_cutpoints": cuts, "provenance": provenance,
     }
-    (out / "result.json").write_text(json.dumps(result, indent=2, default=c21.jsonable) + "\n")
-    (out / "forward_base_trades.json").write_text(json.dumps(gb, indent=2, default=c21.jsonable) + "\n")
+    (out / "result.json").write_text(json.dumps(result, indent=2, default=jsonable) + "\n", encoding="utf-8")
+    (out / "forward_base_trades.json").write_text(json.dumps(gb, indent=2, default=jsonable) + "\n", encoding="utf-8")
     report = [f"# Cycle 26 — {inst}", "", f"Status: **{result['status']}**",
               f"January qualified top60: {len(qualified)}", f"Frozen diverse components: {len(frozen)}",
               f"February gate: {feb_pass}; fail={feb_fail}",
@@ -286,7 +293,7 @@ def run(root: Path, out: Path, inst: str):
     for c in frozen_public:
         report.append(f"- P{c['priority']}: `{c['component_id']}` newJanDates={c['new_january_dates']} Jan BASE PF={c['january_base']['pf']:.3f} STRESS PF={c['january_stress']['pf']:.3f}")
     report += ["", "Research-only. Retired May16-Jul1 and 2025 were not read."]
-    (out / "report.md").write_text("\n".join(report) + "\n")
+    (out / "report.md").write_text("\n".join(report) + "\n", encoding="utf-8")
     print("STATUS", result["status"], "FEB", feb_pass, "FORWARD", passed, flush=True)
 
 
