@@ -161,16 +161,16 @@ def run(root: Path, inst: str, outdir: Path):
     c29.simulate_order = simulate_order
     c29.run(root, inst, outdir)
     mp = outdir / 'run_manifest.json'
-    manifest = json.loads(mp.read_text())
+    manifest = json.loads(mp.read_text(encoding='utf-8'))
     manifest['engine'] = 'cycle31-probe-reclaim-second-touch-v1'
     manifest['cycle31_execution_change_only'] = True
     manifest['probe_reclaim_second_touch'] = True
     manifest['retired_internal_confirmation_accessed'] = False
     manifest['true_oos_2025_accessed'] = False
-    mp.write_text(json.dumps(manifest, indent=2) + '\n')
+    mp.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
     rp = outdir / 'report.md'
-    body = rp.read_text()
-    rp.write_text('# Cycle 31 — Probe → Reclaim → Second-Touch Passive Entry\n\n' + body + '\nResearch-only. Cycle-29 gates unchanged. Retired May16-Jul1 and TRUE OOS 2025 were not accessed.\n')
+    body = rp.read_text(encoding='utf-8')
+    rp.write_text('# Cycle 31 — Probe → Reclaim → Second-Touch Passive Entry\n\n' + body + '\nResearch-only. Cycle-29 gates unchanged. Retired May16-Jul1 and TRUE OOS 2025 were not accessed.\n', encoding='utf-8')
 
 
 if __name__ == '__main__':
