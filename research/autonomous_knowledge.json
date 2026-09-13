@@ -1,0 +1,59 @@
+{
+  "knowledge_version": 1,
+  "updated_through_cycle": 32,
+  "source_audit": "research/CYCLE1_31_REPLAY_AUDIT.md",
+  "validated_live_candidates": [],
+  "historical_research_survivors": [
+    {
+      "id": "A3-USDRUBF-M5-049",
+      "cycle": 3,
+      "research_forward_status": "SURVIVOR_FOUND",
+      "current_lifecycle_status": "confirmation_failed",
+      "research_forward_base_pf": 2.622743830772824,
+      "research_forward_stress_pf": 1.7971959420290036,
+      "research_forward_n": 32
+    }
+  ],
+  "highest_priority_research_cluster": {
+    "origin_cycle": 29,
+    "instrument": "CNYRUBF",
+    "direction": "SHORT",
+    "semantics": "ROUND rejection under high 60m directional efficiency with passive high-R execution",
+    "best_observed_base_pf": 3.3170177776968233,
+    "best_observed_stress_pf": 2.9770393481719526,
+    "best_observed_n": 16,
+    "status": "research_positive_sample_limited"
+  },
+  "cycle32": {
+    "status": "NO_SEMANTIC_SAMPLE_EXPANSION_RESEARCH_SURVIVOR",
+    "primary_result": "ROUND_OR_ROLL60 expanded sample to BASE N31 / STRESS N29 with BASE PF 1.983 and STRESS PF 1.609, bootstrap P10 +0.175, all blocks positive",
+    "reason_for_rejection": "BASE PF below 2.0 and ROLL60 did not independently retain positive STRESS expectancy",
+    "knowledge": [
+      "ROUND remains the dominant positive component",
+      "ROLL60 can add sample but is not an independent robust edge",
+      "do not lower the gate to rescue the pooled candidate",
+      "rotate the next cycle away from anchor pooling"
+    ]
+  },
+  "dead_or_low_priority_families": [
+    "pooled ridge broad prediction",
+    "historical analog mining",
+    "standalone equal-level breakout",
+    "simple passive retest",
+    "Cycle30 probe-reclaim entry geometry",
+    "broad M1 microstructure as implemented"
+  ],
+  "research_fences": {
+    "research_end_exclusive": "2026-05-16",
+    "retired_2026_05_16_to_2026_07_01": "DO_NOT_REOPEN_FOR_SELECTION",
+    "true_oos_2025": "SEALED",
+    "march_to_may15": "RESEARCH_ONLY_ALREADY_INSPECTED",
+    "new_survivor_requires_genuinely_new_untouched_confirmation": true
+  },
+  "next_cycle": {
+    "id": 33,
+    "mode": "exploration",
+    "axis": "completed-H1 regime context over M5 ROUND rejection",
+    "reason": "Cycle32 showed anchor pooling adds sample but does not add independent edge; rotate to a new causal multi-timeframe context axis"
+  }
+}
