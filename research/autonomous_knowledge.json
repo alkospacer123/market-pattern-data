@@ -1,6 +1,6 @@
 {
-  "knowledge_version": 1,
-  "updated_through_cycle": 32,
+  "knowledge_version": 2,
+  "updated_through_cycle": 33,
   "source_audit": "research/CYCLE1_31_REPLAY_AUDIT.md",
   "validated_live_candidates": [],
   "historical_research_survivors": [
@@ -32,7 +32,19 @@
       "ROUND remains the dominant positive component",
       "ROLL60 can add sample but is not an independent robust edge",
       "do not lower the gate to rescue the pooled candidate",
-      "rotate the next cycle away from anchor pooling"
+      "rotate away from anchor pooling"
+    ]
+  },
+  "cycle33": {
+    "status": "NO_COMPLETED_H1_REGIME_RESEARCH_SURVIVOR",
+    "cny": {"generated": 216, "deduped": 216, "discovery_passes": 0, "shortlisted": 0, "survivors": 0},
+    "usd": {"generated": 192, "deduped": 192, "discovery_passes": 0, "shortlisted": 0, "survivors": 0},
+    "reason_for_rejection": "Dedicated completed-H1 regime conditioning produced zero Jan-Feb discovery passes on both instruments",
+    "knowledge": [
+      "close the completed-H1 regime filter branch as implemented",
+      "do not tune H1 thresholds after seeing this result",
+      "ROUND rejection remains a research-positive motif, but H1 conditioning does not broaden it",
+      "rotate Cycle34 to an exit/occupancy axis rather than another context filter"
     ]
   },
   "dead_or_low_priority_families": [
@@ -41,7 +53,8 @@
     "standalone equal-level breakout",
     "simple passive retest",
     "Cycle30 probe-reclaim entry geometry",
-    "broad M1 microstructure as implemented"
+    "broad M1 microstructure as implemented",
+    "completed-H1 regime conditioning over M5 ROUND rejection as implemented"
   ],
   "research_fences": {
     "research_end_exclusive": "2026-05-16",
@@ -51,9 +64,9 @@
     "new_survivor_requires_genuinely_new_untouched_confirmation": true
   },
   "next_cycle": {
-    "id": 33,
+    "id": 34,
     "mode": "exploration",
-    "axis": "completed-H1 regime context over M5 ROUND rejection",
-    "reason": "Cycle32 showed anchor pooling adds sample but does not add independent edge; rotate to a new causal multi-timeframe context axis"
+    "axis": "exit target and position occupancy over frozen M5 ROUND rejection semantics",
+    "reason": "Cycle33 rejected another context filter; test whether the sparse high-R motif can become sufficiently sampled by shorter exits without importing weaker events or relaxing gates"
   }
 }
