@@ -1,6 +1,6 @@
 {
-  "knowledge_version": 3,
-  "updated_through_cycle": 34,
+  "knowledge_version": 4,
+  "updated_through_cycle": 35,
   "source_audit": "research/CYCLE1_31_REPLAY_AUDIT.md",
   "validated_live_candidates": [],
   "historical_research_survivors": [
@@ -23,6 +23,16 @@
     "best_observed_stress_pf": 2.9770393481719526,
     "best_observed_n": 16,
     "status": "research_positive_sample_limited"
+  },
+  "secondary_independent_research_cluster": {
+    "origin_cycle": 27,
+    "instrument": "USDRUBF",
+    "direction": "SHORT",
+    "semantics": "morning ROLL30 rejection with EVENT_EXTREME anchor and fixed-stop high-R execution",
+    "best_observed_base_pf": 2.130450147977564,
+    "best_observed_stress_pf": 1.7711199528704542,
+    "best_observed_n": 21,
+    "status": "research_positive_sample_temporal_limited"
   },
   "cycle32": {
     "status": "NO_SEMANTIC_SAMPLE_EXPANSION_RESEARCH_SURVIVOR",
@@ -60,6 +70,20 @@
       "rotate Cycle35 away from ROUND to a genuinely different structural family"
     ]
   },
+  "cycle35": {
+    "status": "NO_OPENING_RANGE_RESEARCH_SURVIVOR",
+    "cny": {"generated": null, "deduped": null, "discovery_passes": 0, "shortlisted": 0, "survivors": 0},
+    "usd": {"generated": null, "deduped": null, "discovery_passes": 0, "shortlisted": 0, "survivors": 0},
+    "tested_structure": "OPEN30",
+    "tested_events": ["REJECTION", "SWEEP_RECLAIM", "BREAK_RETEST"],
+    "reason_for_rejection": "Both archived shortlist files are empty; under the frozen Cycle35 engine this implies zero Jan-Feb discovery passes on both instruments",
+    "knowledge": [
+      "close the dedicated OPEN30 structural branch as implemented",
+      "do not tune opening-range length or add post-hoc contexts after seeing this result",
+      "opening-range rejection, sweep-reclaim and break-retest did not produce a discovery survivor without context filters",
+      "rotate Cycle36 to the independent USDRUBF ROLL30 morning-rejection cluster observed in Cycle27"
+    ]
+  },
   "dead_or_low_priority_families": [
     "pooled ridge broad prediction",
     "historical analog mining",
@@ -68,7 +92,8 @@
     "Cycle30 probe-reclaim entry geometry",
     "broad M1 microstructure as implemented",
     "completed-H1 regime conditioning over M5 ROUND rejection as implemented",
-    "moderate-R exit/occupancy compression over M5 ROUND rejection as implemented"
+    "moderate-R exit/occupancy compression over M5 ROUND rejection as implemented",
+    "OPEN30 opening-range REJECTION/SWEEP_RECLAIM/BREAK_RETEST without contexts as implemented"
   ],
   "research_fences": {
     "research_end_exclusive": "2026-05-16",
@@ -78,9 +103,9 @@
     "new_survivor_requires_genuinely_new_untouched_confirmation": true
   },
   "next_cycle": {
-    "id": 35,
-    "mode": "exploration",
-    "axis": "opening-range structural behavior after the first 30 minutes of the session",
-    "reason": "Cycle33 and Cycle34 failed before forward evaluation while modifying the strongest ROUND motif; rotate to an independent session-defined structure rather than continue mining ROUND"
+    "id": 36,
+    "mode": "generalization",
+    "axis": "USDRUBF morning ROLL30 rejection generalization across preregistered session windows and adjacent execution settings",
+    "reason": "Cycle35 rejected a fresh opening-range family; rotate to the strongest independent non-ROUND research-positive cluster already observed in Cycle27 and test whether it generalizes without indicator contexts or gate relaxation"
   }
 }
