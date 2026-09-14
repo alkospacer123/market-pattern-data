@@ -1,6 +1,6 @@
 {
-  "knowledge_version": 2,
-  "updated_through_cycle": 33,
+  "knowledge_version": 3,
+  "updated_through_cycle": 34,
   "source_audit": "research/CYCLE1_31_REPLAY_AUDIT.md",
   "validated_live_candidates": [],
   "historical_research_survivors": [
@@ -44,7 +44,20 @@
       "close the completed-H1 regime filter branch as implemented",
       "do not tune H1 thresholds after seeing this result",
       "ROUND rejection remains a research-positive motif, but H1 conditioning does not broaden it",
-      "rotate Cycle34 to an exit/occupancy axis rather than another context filter"
+      "rotate away from another context filter"
+    ]
+  },
+  "cycle34": {
+    "status": "NO_EXIT_OCCUPANCY_RESEARCH_SURVIVOR",
+    "cny": {"generated": 144, "deduped": 144, "discovery_passes": 0, "shortlisted": 0, "survivors": 0},
+    "usd": {"generated": 120, "deduped": 120, "discovery_passes": 0, "shortlisted": 0, "survivors": 0},
+    "tested_exit_geometry": ["1.5R/60m", "2R/90m", "3R/120m"],
+    "reason_for_rejection": "Compressed target/occupancy geometry produced zero Jan-Feb discovery passes on both instruments with the frozen ROUND rejection entry",
+    "knowledge": [
+      "close the moderate-R exit compression branch as implemented",
+      "do not tune intermediate target/hold values after seeing this result",
+      "the Cycle29 ROUND motif appears tied to sparse high-R payoff geometry rather than a generic local entry edge",
+      "rotate Cycle35 away from ROUND to a genuinely different structural family"
     ]
   },
   "dead_or_low_priority_families": [
@@ -54,7 +67,8 @@
     "simple passive retest",
     "Cycle30 probe-reclaim entry geometry",
     "broad M1 microstructure as implemented",
-    "completed-H1 regime conditioning over M5 ROUND rejection as implemented"
+    "completed-H1 regime conditioning over M5 ROUND rejection as implemented",
+    "moderate-R exit/occupancy compression over M5 ROUND rejection as implemented"
   ],
   "research_fences": {
     "research_end_exclusive": "2026-05-16",
@@ -64,9 +78,9 @@
     "new_survivor_requires_genuinely_new_untouched_confirmation": true
   },
   "next_cycle": {
-    "id": 34,
+    "id": 35,
     "mode": "exploration",
-    "axis": "exit target and position occupancy over frozen M5 ROUND rejection semantics",
-    "reason": "Cycle33 rejected another context filter; test whether the sparse high-R motif can become sufficiently sampled by shorter exits without importing weaker events or relaxing gates"
+    "axis": "opening-range structural behavior after the first 30 minutes of the session",
+    "reason": "Cycle33 and Cycle34 failed before forward evaluation while modifying the strongest ROUND motif; rotate to an independent session-defined structure rather than continue mining ROUND"
   }
 }
