@@ -72,6 +72,23 @@ Mar-May15 is already repeatedly inspected and remains research-only. A Cycle34 p
 
 Use the unchanged Cycle29 discovery gate. No threshold is lowered for the lower-R family.
 
+## Candidate freezing
+
+All discovery-pass candidates are ranked using discovery data only, with the same deterministic priority used by the late structural search:
+1. maximize the weaker of January-STRESS and February-STRESS expectancy;
+2. maximize discovery STRESS PF;
+3. maximize discovery BASE PF;
+4. maximize discovery STRESS expectancy;
+5. maximize discovery BASE unique days;
+6. deterministic candidate ID tie-break.
+
+Freeze at most 60 candidates.
+
+Diversity cap before forward evaluation:
+- at most 3 candidates per `(direction, anchor_mode, target_r)` bucket.
+
+No Mar-May15 quantity may affect ranking, deduplication, or shortlist membership.
+
 ## Forward survivor gates
 
 Use the unchanged Cycle29 strict gates:
